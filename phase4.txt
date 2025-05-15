@@ -1,0 +1,81 @@
+import random
+import threading
+import time
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from cryptography.fernet import Fernet
+import matplotlib.pyplot as plt
+
+# Step 1: Simulate Sensor Data
+def simulate_sensor_data():
+    return {
+        "temperature": random.uniform(22.0, 28.0),
+        "humidity": random.uniform(30.0, 50.0),
+        "voltage": random.uniform(210.0, 230.0),
+        "current": random.uniform(0.5, 1.5)
+    }
+
+# Step 2: Filtering (Noise reduction)
+def filter_sensor_data(data):
+    filtered = {k: round(v, 2) for k, v in data.items()}
+    return filtered
+
+# Step 3: Predictive Model (Simple Linear Regression)
+def train_model():
+    # Fake historical dataset
+    X = np.array([[22], [23], [24], [25], [26], [27]])
+    y = np.array([100, 95, 92, 89, 85, 80])  # Simulated power usage
+    model = LinearRegression().fit(X, y)
+    return model
+
+# Step 4: Real-time Monitoring Dashboard (CLI-based)
+def display_dashboard(data, predicted_usage):
+    print(f"\n--- Real-time Dashboard ---")
+    print(f"Temperature: {data['temperature']} °C")
+    print(f"Humidity: {data['humidity']} %")
+    print(f"Voltage: {data['voltage']} V")
+    print(f"Current: {data['current']} A")
+    print(f"Predicted Power Usage: {predicted_usage:.2f} W")
+    print(f"Suggestions: {'Reduce load' if predicted_usage > 90 else 'Normal usage'}")
+    print("---------------------------")
+
+# Step 5: AES Encryption Simulation
+def encrypt_data(data):
+    key = Fernet.generate_key()
+    cipher = Fernet(key)
+    message = str(data).encode()
+    encrypted = cipher.encrypt(message)
+    return encrypted, cipher, key
+
+def decrypt_data(encrypted, cipher):
+    return cipher.decrypt(encrypted).decode()
+
+# Step 6: Threaded Node Monitoring
+def energy_node_monitor(node_id, model):
+    for _ in range(3):  # Simulate 3 readings
+        data = simulate_sensor_data()
+        data = filter_sensor_data(data)
+        predicted = model.predict([[data["temperature"]]])[0]
+        display_dashboard(data, predicted)
+        encrypted, cipher, key = encrypt_data(data)
+        decrypted = decrypt_data(encrypted, cipher)
+        print(f"Node {node_id} Secure Transmission ✅\nDecrypted: {decrypted}\n")
+        time.sleep(2)
+
+# Run the entire system
+if _name_ == "_main_":
+    print("Starting Energy Efficiency Optimization System...\n")
+    model = train_model()
+    threads = []
+    
+    # Simulate 2 modular nodes
+    for i in range(2):
+        t = threading.Thread(target=energy_node_monitor, args=(i+1, model))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    print("\nSystem Monitoring Completed.")
